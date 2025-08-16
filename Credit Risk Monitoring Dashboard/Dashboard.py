@@ -3,11 +3,11 @@ import sqlite3
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# 1. Load the dataset
+# Load the dataset
 df = pd.read_csv("UCI_Credit_Card.csv")
 print("Data Loaded:\n", df.head())
 
-# 2. Basic info and cleaning
+# Basic info and cleaning
 print("\nData Info:\n")
 print(df.info())
 
@@ -15,7 +15,7 @@ print(df.info())
 numeric_cols = df.columns.drop(["ID"])
 df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric, errors="coerce")
 
-# 3. Summary metrics (Python side)
+# Summary metrics (Python side)
 avg_limit = df["LIMIT_BAL"].mean()
 default_rate = df["default payment next month"].mean() * 100
 avg_age = df["AGE"].mean()
@@ -28,14 +28,14 @@ print(f"Average Age: {avg_age:.1f} years")
 default_by_edu = df.groupby("EDUCATION")["default payment next month"].mean() * 100
 print("\nDefault rate by education:\n", default_by_edu)
 
-# 4. Store DataFrame into SQLite
+# Store DataFrame into SQLite
 conn = sqlite3.connect("credit_card.db")
 df.to_sql("credit_clients", conn, if_exists="replace", index=False)
 
-# 5. SQL QUERIES (examples)
+# SQL QUERIES (examples)
 print("\nRunning SQL queries...\n")
 
-# Example 1: Average credit limit by marriage status
+# Average credit limit by marriage status
 query1 = """
 SELECT MARRIAGE, AVG(LIMIT_BAL) AS avg_limit
 FROM credit_clients
@@ -45,7 +45,7 @@ ORDER BY avg_limit DESC;
 result1 = pd.read_sql_query(query1, conn)
 print("Average Limit by Marriage Status:\n", result1)
 
-# Example 2: Default rate by age group
+# Default rate by age group
 query2 = """
 SELECT 
     CASE
@@ -60,7 +60,7 @@ GROUP BY age_group;
 result2 = pd.read_sql_query(query2, conn)
 print("\nDefault Rate by Age Group:\n", result2)
 
-# Example 3: Monthly average bill amounts
+# Monthly average bill amounts
 query3 = """
 SELECT 
     ROUND(AVG(BILL_AMT1), 2) AS avg_bill_m1,
@@ -71,7 +71,7 @@ FROM credit_clients;
 result3 = pd.read_sql_query(query3, conn)
 print("\nAverage Bill Amounts:\n", result3)
 
-# 6. Visualizations
+# Visualizations
 # Plot default rate by education level
 plt.figure(figsize=(8,5))
 sns.barplot(x=default_by_edu.index, y=default_by_edu.values, palette="viridis")
@@ -96,6 +96,7 @@ plt.xlabel("Default Next Month (0=No, 1=Yes)")
 plt.ylabel("Delay in Months (PAY_0)")
 plt.show()
 
+# save as excel
 df.to_excel("cleaned_credit_data.xlsx", index=False)
 
 conn.close()
